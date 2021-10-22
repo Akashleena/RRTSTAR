@@ -6,10 +6,11 @@
  *==================================================================================================
 */
 
-#include <rrt_star_global_planner/rrt_star_global_planner.hpp>
+#include <rrt_star_global_planner.hpp>
 #include <pluginlib/class_list_macros.h>
 #include <iostream>
-
+#include <random>
+using namespace std;
 std::random_device rd;
 static std::default_random_engine generator ( rd() );
 

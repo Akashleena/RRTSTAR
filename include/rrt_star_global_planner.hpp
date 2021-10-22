@@ -212,3 +212,4 @@ namespace RRTstar_planner
   };
 }; // RRTstar_planner namespace
 #endif
+#endif
