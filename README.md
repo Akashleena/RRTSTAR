@@ -1,6 +1,6 @@
 # RRT* move_base plugin
 
-The quadcopter_navigation package can be found [here](https://github.com/Akashleena/quadSimulator)
+The quadcopter_navigation package can be found [here](https://github.com/Akashleena/quadcopter_motion_planning)
 
 
 In Terminal 1
