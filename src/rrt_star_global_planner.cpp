@@ -33,19 +33,10 @@ namespace RRTstar_planner
         : costmap_ros_(costmap_ros)
   {
       
-     ros::Subscriber globalcostmap = nh.subscribe("/move_base/global_costmap/costmap_updates", 1000, &RRTstarPlannerROS::gbcostmapcb, this);
-     //initialize the planner
-     costmap_2d::Costmap2DROS* costmap_ros;
+     
       initialize(name, costmap_ros);
   }
    
-   void RRTstarPlannerROS::gbcostmapcb(const map_msgs::OccupancyGridUpdate& msg)
-     {
-      //costmap_2d::Costmap2DROS* costmap_ros
-      costmap_=msg
-      ->getCostmap();
-      std::cout<< "global costmap callback !! " << std::endl;
-     }
     
   void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
   {
@@ -178,12 +169,9 @@ namespace RRTstar_planner
             pose.pose.orientation.z = 0.0;
             pose.pose.orientation.w = 1.0;
             plan.push_back(pose);
-            navmsgpath.header.stamp = plan_time;
-            navmsgpath.header.frame_id ='/map';
-            navmsgpath.poses.push_back(pose);
+            
           }
-          ros::Publisher global_pub = nh.advertise<nav_msgs::Path>("/global_plan", 1000);
-          global_pub.publish(navmsgpath);
+         
           return true;
 
         }
@@ -386,27 +374,3 @@ namespace RRTstar_planner
 }; // RRTstar_planner namespace
 
 
-int main(int argc, char **argv)
-{
- 
-  ros::init(argc, argv, "rrt_star_global_planner"); //node name
-  
-  ROS_INFO_STREAM("inside main \n");
- 
-
-//RRTstar_planner::RRTstarPlannerROS rrtstar;
- RRTstar_planner::RRTstarPlannerROS rrtstar = RRTstar_planner::RRTstarPlannerROS("RRTstarPlannerROS");
- std::vector<geometry_msgs::PoseStamped> plan;
-  geometry_msgs::PoseStamped start;
-  start.pose.position.x=0.027;
-  start.pose.position.y=0.131;
- geometry_msgs::PoseStamped goal;
- goal.pose.position.x=100;
- goal.pose.position.y=100; //is there a way we can subscribe to rviz clicked point and pass as goal pose?
- rrtstar.makePlan(start,goal,plan);
-  //rrtros.RRTstarPlannerROS(rrtros.start, rrtros);
-  //rrtros.makePlan();
-  ros::spin();
-  return 0;
-    
-} 

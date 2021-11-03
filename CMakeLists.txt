@@ -35,7 +35,7 @@ include_directories(
 #    src/rrt_star_global_planner.cpp
 # )
 
-add_executable(rrt_star_global src/rrt_star_global_planner.cpp)
+add_executable(rrt_star_global src/rrt_star_global_planner_node.cpp)
 add_dependencies(rrt_star_global ${rrt_star_global_planner_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(rrt_star_global
   ${catkin_LIBRARIES}
