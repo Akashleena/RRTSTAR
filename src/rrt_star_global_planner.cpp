@@ -8,12 +8,8 @@
 
 #include <rrt_star_global_planner.hpp>
 #include <pluginlib/class_list_macros.h>
-
 #include <iostream>
 #include <random>
-#include <costmap_2d/costmap_2d_ros.h>
-//#include <dwa_local_planner/dwa_planner_ros.h> 
-#include<nav_msgs/Path.h>//to use nav_msgs/path
 using namespace std;
 std::random_device rd;
 static std::default_random_engine generator ( rd() );
@@ -23,57 +19,46 @@ PLUGINLIB_EXPORT_CLASS(RRTstar_planner::RRTstarPlannerROS, nav_core::BaseGlobalP
 
 namespace RRTstar_planner
 {
-  
-  
 
   RRTstarPlannerROS::RRTstarPlannerROS() 
           : costmap_(nullptr), initialized_(false) { }
 
-  RRTstarPlannerROS::RRTstarPlannerROS(std::string name) 
+  RRTstarPlannerROS::RRTstarPlannerROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros) 
         : costmap_ros_(costmap_ros)
   {
-      
-     
+      //initialize the planner
       initialize(name, costmap_ros);
   }
-   
-    
+
   void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
   {
 
     if (!initialized_)
     {
       // Initialize map
-      costmap_ros_ = costmap_ros; //initialize the costmap_ros_ attribute to the parameter
-      costmap_ = costmap_ros->getCostmap(); //get the costmap_ from costmap_ros_
+      costmap_ros_ = costmap_ros;
+      costmap_ = costmap_ros->getCostmap();
   
       ros::NodeHandle private_nh("~/" + name);
   
       originX = costmap_->getOriginX();
-      cout<<"Origin x"<<originX<<endl; //0.016-0.027
       originY = costmap_->getOriginY();
-      cout<<"Origin y"<<originY<<endl; //0.00319-0.131
-	    width = costmap_->getSizeInCellsX(); //10,000
-	    height = costmap_->getSizeInCellsY(); //10,000
-      cout<<"width"<<width<<endl;
-      cout<<"height"<<height<<endl;
-	    resolution = costmap_->getResolution(); //0.05m/pixel
-      cout<<"Resolution of costmap"<<resolution<<endl;
+	    width = costmap_->getSizeInCellsX();
+	    height = costmap_->getSizeInCellsY();
+	    resolution = costmap_->getResolution();
 
-      RADIUS = 0.3;
+      RADIUS = 1.0;
       GOAL_RADIUS = 0.5;
       epsilon_min = 0.05;
       epsilon_max = 0.1;
 
       ROS_INFO("RRT* planner initialized successfully");
       initialized_ = true;
-     //makePlan(start, goal, plan);
     }
     else
       ROS_WARN("This planner has already been initialized... doing nothing");
-
   }
-  
+
   bool RRTstarPlannerROS::makePlan(const geometry_msgs::PoseStamped& start,
                 const geometry_msgs::PoseStamped& goal,
                 std::vector<geometry_msgs::PoseStamped>& plan)
@@ -87,7 +72,7 @@ namespace RRTstar_planner
 
     std::vector<Node> nodes;
 
-    MAX_NUM_NODES = 30000;
+    MAX_NUM_NODES = 20000;
 
     Node start_node;
     start_node.x = start.pose.position.x;
@@ -95,7 +80,7 @@ namespace RRTstar_planner
     start_node.node_id = 0;
     start_node.parent_id = -1; // None parent node
     start_node.cost = 0.0;
-    cout<<"Start node:"<<"x"<<start_node.x<<endl<<"y:"<<start_node.y<<endl;
+
     nodes.push_back(start_node);
     
     std::pair<float, float> p_rand;
@@ -160,7 +145,7 @@ namespace RRTstar_planner
             //std::cout << path[i].first << " " << path[i].second << std::endl;
             geometry_msgs::PoseStamped pose;
             pose.header.stamp = plan_time;
-            pose.header.frame_id = '/map';
+            pose.header.frame_id = "map";
             pose.pose.position.x = path[i].first;
             pose.pose.position.y = path[i].second;
             pose.pose.position.z = 0.0;
@@ -169,11 +154,8 @@ namespace RRTstar_planner
             pose.pose.orientation.z = 0.0;
             pose.pose.orientation.w = 1.0;
             plan.push_back(pose);
-            
           }
-         
           return true;
-
         }
         else
         {
@@ -184,7 +166,6 @@ namespace RRTstar_planner
     }
     ROS_WARN("The planner failed to find a path, choose other goal position");
     return false;
-   
   }
 
   bool RRTstarPlannerROS::pointCircleCollision(float x1, float y1, float x2, float y2, float radius)
@@ -205,7 +186,7 @@ namespace RRTstar_planner
   std::pair<float, float> RRTstarPlannerROS::sampleFree()
   {
     std::pair<float, float> random_point;
-    for (int i = 0; i < 50000; i++)
+    for (int i = 0; i < 10000; i++)
     {
       // generate random x and y coords within map bounds
       
@@ -215,8 +196,8 @@ namespace RRTstar_planner
       //float map_height = costmap_->getSizeInMetersY();
       
       // Using the clearpath Husky World I know that the dimensions are
-      float map_width = 10000;
-      float map_height = 10000;
+      float map_width = 10.0;
+      float map_height = 10.0;
       std::uniform_real_distribution<> x(-map_width, map_width);
       std::uniform_real_distribution<> y(-map_height, map_height);
   
@@ -255,7 +236,7 @@ namespace RRTstar_planner
     int mx, my;
     worldToMap(wx, wy, mx, my);
 
-    if ((mx < 0) || (my < 0) || (mx >= costmap_->getSizeInCellsX()) || (my >= costmap_->getSizeInCellsY())) //going outside map
+    if ((mx < 0) || (my < 0) || (mx >= costmap_->getSizeInCellsX()) || (my >= costmap_->getSizeInCellsY()))
       return true;
 
     // grid[row][column] = vector[row*WIDTH + column]
@@ -263,7 +244,7 @@ namespace RRTstar_planner
     //  return true;
 
     unsigned int cost = static_cast<int>(costmap_ -> getCost(mx, my));
-    if (cost > 0) //freespace cost==0
+    if (cost > 0)
       return true;
     
     return false;
@@ -359,7 +340,7 @@ namespace RRTstar_planner
       for (int i = 0;i < value; i++)
       {
         theta = atan2(node_nearest.y - py, node_nearest.x - px);
-        p_n.first = node_nearest.x + n*resolution*cos(theta); //get co-ordinates of each pixel value b/w nearestnode and new node
+        p_n.first = node_nearest.x + n*resolution*cos(theta);
         p_n.second = node_nearest.y + n*resolution*sin(theta);
         if (collision(p_n.first, p_n.second))
           return false;
@@ -370,7 +351,4 @@ namespace RRTstar_planner
     }
   }
 
-
 }; // RRTstar_planner namespace
-
-

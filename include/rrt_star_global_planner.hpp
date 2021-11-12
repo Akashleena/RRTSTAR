@@ -72,7 +72,7 @@ namespace RRTstar_planner
       */
       RRTstarPlannerROS();
 
-
+      
       RRTstarPlannerROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
 
       /**
@@ -211,5 +211,6 @@ namespace RRTstar_planner
 
   };
 }; // RRTstar_planner namespace
+
 #endif
 #endif

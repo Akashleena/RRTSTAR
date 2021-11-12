@@ -8,8 +8,9 @@
 #ifndef RRT_STAR_PLANNER_HPP_
 #define RRT_STAR_PLANNER_HPP_
 #include <ros/ros.h>
-#include<nav_msgs/Path.h>
+#include <nav_msgs/Path.h>
 #include <move_base_msgs/MoveBaseAction.h>
+#include<nav_msgs/OccupancyGrid.h>
 
 /** for global path planner interface **/
 #include <costmap_2d/costmap_2d_ros.h>
@@ -19,7 +20,7 @@
 #include <angles/angles.h>
 #include <base_local_planner/world_model.h>
 #include <base_local_planner/costmap_model.h>
-#include <dwa_local_planner/dwa_planner_ros.h>
+//#include <dwa_local_planner/dwa_planner_ros.h>
 /** include standard libraries **/
 #include <iostream>
 #include <cmath>
@@ -81,7 +82,7 @@ namespace RRTstar_planner
       //RRTstarPlannerROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
       RRTstarPlannerROS(std::string name);
       
-      void gbcostmapcb(const map_msgs::OccupancyGridUpdate& msg);
+      void gbcostmapcb(const nav_msgs::OccupancyGrid& msg);
       /**
       * @brief  Initialization function for the PlannerCore object
       * @param  name The name of this planner

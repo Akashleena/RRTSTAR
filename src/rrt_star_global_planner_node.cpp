@@ -6,12 +6,13 @@
  *==================================================================================================
 */
 
-#include <rrt_star_global_planner.hpp>
-#include <pluginlib/class_list_macros.h>
-
+#include <rrt_star_global_planner_node.hpp>
+//#include <pluginlib/class_list_macros.h>
+#include<nav_msgs/OccupancyGrid.h>
 #include <iostream>
 #include <random>
 #include <costmap_2d/costmap_2d_ros.h>
+#include <costmap_2d/costmap_2d.h>
 //#include <dwa_local_planner/dwa_planner_ros.h> 
 #include<nav_msgs/Path.h>//to use nav_msgs/path
 using namespace std;
@@ -19,7 +20,7 @@ std::random_device rd;
 static std::default_random_engine generator ( rd() );
 
 //register this planner as a BaseGlobalPlanner plugin
-PLUGINLIB_EXPORT_CLASS(RRTstar_planner::RRTstarPlannerROS, nav_core::BaseGlobalPlanner)
+//PLUGINLIB_EXPORT_CLASS(RRTstar_planner::RRTstarPlannerROS, nav_core::BaseGlobalPlanner)
 
 namespace RRTstar_planner
 {
@@ -32,18 +33,19 @@ namespace RRTstar_planner
   RRTstarPlannerROS::RRTstarPlannerROS(std::string name) 
         : costmap_ros_(costmap_ros)
   {
-      
-     ros::Subscriber globalcostmap = nh.subscribe("/move_base/global_costmap/costmap_updates", 1000, &RRTstarPlannerROS::gbcostmapcb, this);
+      //subscribe to voxel grid and pass to costmap
+     ros::Subscriber globalcostmap = nh.subscribe("/move_base/global_costmap/costmap", 1000, &RRTstarPlannerROS::gbcostmapcb, this);
      //initialize the planner
      costmap_2d::Costmap2DROS* costmap_ros;
       initialize(name, costmap_ros);
   }
    
-   void RRTstarPlannerROS::gbcostmapcb(const map_msgs::OccupancyGridUpdate& msg)
+   void RRTstarPlannerROS::gbcostmapcb(const nav_msgs::OccupancyGrid& msg)
      {
       //costmap_2d::Costmap2DROS* costmap_ros
-      costmap_=msg
-      ->getCostmap();
+      //pass occupancy grid to constructor of the class costmap
+      //Costmap2D (unsigned int cells_size_x, unsigned int cells_size_y, double resolution, double origin_x, double origin_y, unsigned char default_value=0)
+      costmap_2d::Costmap2D(msg.info.width, msg.info.height, msg.info.resolution, msg.info.origin.position.x, msg.info.origin.position.y);
       std::cout<< "global costmap callback !! " << std::endl;
      }
     
@@ -59,6 +61,7 @@ namespace RRTstar_planner
       ros::NodeHandle private_nh("~/" + name);
   
       originX = costmap_->getOriginX();
+      
       cout<<"Origin x"<<originX<<endl; //0.016-0.027
       originY = costmap_->getOriginY();
       cout<<"Origin y"<<originY<<endl; //0.00319-0.131
