@@ -66,21 +66,23 @@ namespace RRTstar_planner
 
   class RRTstarPlannerROS : public nav_core::BaseGlobalPlanner 
   {
-
-    public:
+    private:
+    ros::NodeHandle nh;
       /**
       * @brief Default constructor of the plugin
       */
-      RRTstarPlannerROS();
+      // RRTstarPlannerROS();
       std::string name;
       costmap_2d::Costmap2DROS* costmap_ros;
       geometry_msgs::PoseStamped goal;
       geometry_msgs::PoseStamped start;
       std::vector<geometry_msgs::PoseStamped> plan;
       nav_msgs::Path navmsgpath;
-      ros::NodeHandle nh;
+      ros::Subscriber globalcostmap_sub;
+     
+      public:
       //RRTstarPlannerROS(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
-      RRTstarPlannerROS(std::string name);
+      RRTstarPlannerROS(const std::string & name);
       
       void gbcostmapcb(const nav_msgs::OccupancyGrid& msg);
       /**
@@ -186,6 +188,8 @@ namespace RRTstar_planner
       float GOAL_RADIUS;
       float epsilon_min;
       float epsilon_max;
+
+   
     protected:
 
       /**

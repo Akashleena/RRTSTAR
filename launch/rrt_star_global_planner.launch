@@ -1,0 +1,4 @@
+
+<launch>
+    <node pkg="rrt_star_global_planner" type="rrt_star_global" name="rrt_star_global_planner" args="RRTstarPlannerROS"/>        
+</launch>
