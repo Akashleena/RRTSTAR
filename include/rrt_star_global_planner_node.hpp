@@ -64,7 +64,7 @@ struct Node {
 namespace RRTstar_planner 
 {
 
-  class RRTstarPlannerROS : public nav_core::BaseGlobalPlanner 
+  class RRTstarPlannerROS 
   {
     private:
     ros::NodeHandle nh;
@@ -74,6 +74,7 @@ namespace RRTstar_planner
       // RRTstarPlannerROS();
       std::string name;
       costmap_2d::Costmap2DROS* costmap_ros;
+      costmap_2d::Costmap2D* costmap_;
       geometry_msgs::PoseStamped goal;
       geometry_msgs::PoseStamped start;
       std::vector<geometry_msgs::PoseStamped> plan;
@@ -92,7 +93,7 @@ namespace RRTstar_planner
       */
   
       
-      void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
+      void initialize(std::string name, costmap_2d::Costmap2D* costmap_);
 
       /**
        * @brief Given a goal pose in the world, compute a plan
@@ -195,10 +196,10 @@ namespace RRTstar_planner
       /**
       * @brief Store a copy of the current costmap in \a costmap.  Called by makePlan.
       */
-      costmap_2d::Costmap2D* costmap_;
-      costmap_2d::Costmap2DROS* costmap_ros_;
+      
+      //costmap_2d::Costmap2DROS* costmap_ros_;
       std::string frame_id_;
-      ros::Publisher plan_pub_;
+      //ros::Publisher plan_pub_;
       
       // TODO
       //allow_unknown_;

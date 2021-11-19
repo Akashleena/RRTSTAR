@@ -38,7 +38,7 @@ namespace RRTstar_planner
   void RRTstarPlannerROS::gbcostmapcb(const nav_msgs::OccupancyGrid &msg)
   {
 
-    // costmap_2d::Costmap2DROS *costmap_ros = new costmap_2d::Costmap2D(msg.info.width, msg.info.height, msg.info.resolution, msg.info.origin.position.x, msg.info.origin.position.y);
+    costmap_2d::Costmap2D *costmap_ = new costmap_2d::Costmap2D(msg.info.width, msg.info.height, msg.info.resolution, msg.info.origin.position.x, msg.info.origin.position.y);
     cout << "\n message info ";
     // cout << "\n width" << msg.info.width;
     // cout << "\n height" << msg.info.height;
@@ -46,18 +46,19 @@ namespace RRTstar_planner
     // cout << "\n origin" << msg.info.origin.position.x << " " << msg.info.origin.position.y << endl;
     // costmap_ = costmap_ros->getCostmap();
     // std::cout << "global costmap callback !! " << std::endl;
+    initialize("RRTstarPlannerROS",costmap_);
   }
 
-  void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2DROS *costmap_ros)
+  void RRTstarPlannerROS::initialize(std::string name, costmap_2d::Costmap2D *costmap_)
   {
 
-    if (!initialized_)
-    {
+//    if (!initialized_)
+  //  {
       // Initialize map
-      costmap_ros_ = costmap_ros;           //initialize the costmap_ros_ attribute to the parameter
-      costmap_ = costmap_ros->getCostmap(); //get the costmap_ from costmap_ros_
+      //costmap_ros_ = costmap_ros;           //initialize the costmap_ros_ attribute to the parameter
+      //costmap_ = costmap_ros->getCostmap(); //get the costmap_ from costmap_ros_
 
-      ros::NodeHandle private_nh("~/" + name);
+      //ros::NodeHandle private_nh("~/" + name);
 
       originX = costmap_->getOriginX();
 
@@ -77,11 +78,15 @@ namespace RRTstar_planner
       epsilon_max = 0.1;
 
       ROS_INFO("RRT* planner initialized successfully");
-      initialized_ = true;
-      //makePlan(start, goal, plan);
-    }
-    else
-      ROS_WARN("This planner has already been initialized... doing nothing");
+      RRTstarPlannerROS::start.pose.position.x = 0.027;
+      RRTstarPlannerROS::start.pose.position.y = 0.131;
+      
+      RRTstarPlannerROS::goal.pose.position.x = 5;
+      RRTstarPlannerROS::goal.pose.position.y = 5;
+      makePlan(start, goal, plan);
+    //}
+   // else
+     // ROS_WARN("This planner has already been initialized... doing nothing");
   }
 
   bool RRTstarPlannerROS::makePlan(const geometry_msgs::PoseStamped &start,
@@ -92,7 +97,7 @@ namespace RRTstar_planner
     plan.clear();
 
     std::vector<std::pair<float, float>> path;
-    ros::NodeHandle n;
+   
     std::string global_frame = frame_id_;
 
     std::vector<Node> nodes;
@@ -230,8 +235,8 @@ namespace RRTstar_planner
       //float map_height = costmap_->getSizeInMetersY();
 
       // Using the clearpath Husky World I know that the dimensions are
-      float map_width = 100;
-      float map_height = 100;
+      float map_width = 50;
+      float map_height = 50;
       std::uniform_real_distribution<> x(-map_width, map_width);
       std::uniform_real_distribution<> y(-map_height, map_height);
 
@@ -240,12 +245,7 @@ namespace RRTstar_planner
 
       if (!collision(random_point.first, random_point.second))
         return random_point;
-      //TODO check collision
-      //TODO check collision
-      //TODO check collision
-      //TODO check collision
-      //TODO check collision
-      //TODO check collision
+   
     }
     return random_point;
   }
@@ -268,21 +268,28 @@ namespace RRTstar_planner
   //check if point collides with the obstacle
   bool RRTstarPlannerROS::collision(float wx, float wy)
   {
-    int mx, my;
-    worldToMap(wx, wy, mx, my);
-
-    if ((mx < 0) || (my < 0) || (mx >= costmap_->getSizeInCellsX()) || (my >= costmap_->getSizeInCellsY())) //going outside map
-      return true;
-
-    // grid[row][column] = vector[row*WIDTH + column]
-    //if (costmap_[my*width + mx] > 0)
-    //  return true;
+    
+      int mx = 0 , my = 0;
+      cout<<"a"<<endl;
+      //worldToMap(wx, wy, mx, my);
+      cout<<"b"<<endl;
+      if ((mx < 0) || (my < 0) || (mx >= costmap_->getSizeInCellsX()) || (my >= costmap_->getSizeInCellsY())) //going outside map
+       return true;
+      cout<<"c"<<endl;
 
     unsigned int cost = static_cast<int>(costmap_->getCost(mx, my));
-    if (cost > 0) //freespace cost==0
+      cout<<"d"<<endl;
+     if (cost > 0)
+     { //freespace cost==0
+     cout<<"e"<<endl;
       return true;
-
-    return false;
+     }
+     else{
+       cout<<"f"<<endl;
+      return false;}
+  //return true;
+  
+    
   }
 
   Node RRTstarPlannerROS::getNearest(std::vector<Node> nodes, std::pair<float, float> p_rand)
@@ -403,11 +410,7 @@ int main(int argc, char **argv)
   ROS_INFO_STREAM("constructor called \n");
   std::vector<geometry_msgs::PoseStamped> plan;
   geometry_msgs::PoseStamped start;
-  start.pose.position.x = 0.027;
-  start.pose.position.y = 0.131;
-  geometry_msgs::PoseStamped goal;
-  goal.pose.position.x = 100;
-  goal.pose.position.y = 100; //or subscribe to move_base_simple/goal
+   //or subscribe to move_base_simple/goal
   // rrtstar->makePlan(start, goal, plan);
   //rrtros.RRTstarPlannerROS(rrtros.start, rrtros);
   //rrtros.makePlan();

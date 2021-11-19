@@ -1,0 +1,11 @@
+void GlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros) {
+    initialize(name, costmap_ros->getCostmap(), costmap_ros->getGlobalFrameID());
+}
+
+void GlobalPlanner::initialize(std::string name, costmap_2d::Costmap2D* costmap, std::string frame_id) {
+    if (!initialized_) {
+        ros::NodeHandle private_nh("~/" + name);
+        costmap_ = costmap;
+        frame_id_ = frame_id;
+
+        

@@ -4,11 +4,13 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [             
+      
         {
             "name": "ROS: Launch",
             "type": "ros",
             "request": "launch",
             "target": "/home/aleena/catkin_ws/src/rrt_star_global_planner/launch/rrt_star_global_planner.launch"
+            
         }
       
        

@@ -68,7 +68,7 @@ namespace RRTstar_planner
 
     std::vector<std::pair<float, float>> path;
     ros::NodeHandle n;
-    std::string global_frame = frame_id_;
+    //std::string global_frame = frame_id_;
 
     std::vector<Node> nodes;
 
@@ -85,6 +85,7 @@ namespace RRTstar_planner
     
     std::pair<float, float> p_rand;
     std::pair<float, float> p_new;
+   
 
     Node node_nearest;
     while (nodes.size() < MAX_NUM_NODES)
